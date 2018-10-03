@@ -1,1 +1,1 @@
-# Eureka Rule - ValidDirectoryName
+# Eureka Rule - Valid Directory Name
