@@ -1,0 +1,53 @@
+//  Created by Husam Aamer on 10/3/18.
+//  Copyright © 2018 AppChief. All rights reserved.
+//
+
+import Eureka
+open class RuleValidDirectoryName: RuleType {
+    
+    /// Use this in your error description
+    static var forbiddenCharacters : String {return "{/, <, >, :, \", \\, |, ?, *}"}
+    
+    
+    public var regExpr: String = ""
+    public var validationError: ValidationError
+    public var allowsEmpty = true
+    public var id: String?
+    
+    public init(allowsEmpty: Bool = true, msg: String? = nil, id :String? = nil) {
+        let forbiddenChars = [
+            //To result 3 backslashes in in one string
+            // 1st backslash for swift escaping
+            // 2nd backslash for escaping 3rd backslash in regex
+            // 3rd backslash is the forbidden character
+            "\\~BackSlashHere~".replacingOccurrences(of: "~BackSlashHere~", with: "\\"),
+            
+            "<",
+            ">",
+            "/",
+            ":",
+            "\"",
+            "?",
+            "*",
+            "|"
+        ]
+        
+        self.regExpr = "^[^\(forbiddenChars.joined())]*$"
+        self.validationError = ValidationError(msg: msg ?? "String shouldn't contain the following characters \(RuleValidDirectoryName.forbiddenCharacters)")
+        self.allowsEmpty = allowsEmpty
+        self.id = id
+    }
+    
+    public func isValid(value: String?) -> ValidationError? {
+        if let value = value, !value.isEmpty {
+            let predicate = NSPredicate(format: "SELF MATCHES %@", regExpr)
+            guard predicate.evaluate(with: value) else {
+                return validationError
+            }
+            return nil
+        } else if !allowsEmpty {
+            return validationError
+        }
+        return nil
+    }
+}
